@@ -49,7 +49,7 @@ function dataExtracter(html){
             if(numberOfTds.length == 8){
                 //let stats = searchTool(numberOfTds).text();
                 //content += stats;
-                json[searchTool(numberOfTds[0]).text().trim()] = [];
+                
                     let data = {
                         "team": teamName,
                         "outBy":  searchTool(numberOfTds[1]).text(),
@@ -60,7 +60,7 @@ function dataExtracter(html){
                         "sr":  searchTool(numberOfTds[7]).text()
                     }
 
-                    json[searchTool(numberOfTds[0]).text().trim()].push(data);
+                    json[searchTool(numberOfTds[0]).text().trim()] = data;
               
                 //   json.push(searchTool(numberOfTds[0]).text(), searchTool(numberOfTds[1]).text(),
                 //     searchTool(numberOfTds[2]).text(), searchTool(numberOfTds[3]).text(), searchTool(numberOfTds[5]).text(),
@@ -71,23 +71,42 @@ function dataExtracter(html){
         //fs.writeFileSync(`innings${i+1}.html`, scoreCard);
     }
 
+    // for(let i in json){
+    //     console.log(json[i]);
+    // }
+ 
      // console.log(content);
      //console.log(json);
     for(let i in json){
        // console.log(json[i][0]['team'])
-        let teamPath = path.join(process.cwd(), 'players', json[i][0]['team']);
+       let dirPath = path.join(process.cwd(), 'players');
+       if(!fs.existsSync(dirPath)){
+           fs.mkdirSync(dirPath);
+       }
+        let teamPath = path.join(dirPath, json[i]['team']);
         if(!fs.existsSync(teamPath)){
             fs.mkdirSync(teamPath);
         }
-            let data = {};
-            data[i] = json[i];
+
+            let data={};
+            data[i] = [];
 
             let playerPath =  path.join(teamPath, i+'.json');
             if(!fs.existsSync(playerPath)){
-                fs.writeFileSync(playerPath, "");
+                fs.writeFileSync(playerPath, JSON.stringify(data));
             }
+
+            data = fs.readFileSync(playerPath);
+            data = JSON.parse(data);
+
+            // if(typeof data[i]=='undefined'){
+            //     data[i] = [];
+            // }
+            data[i].push(json[i]);
+         
+            
             data = JSON.stringify(data);
-            fs.appendFileSync(playerPath, data);
+            fs.writeFileSync(playerPath, data);
 
        
     }
